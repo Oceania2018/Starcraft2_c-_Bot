@@ -1,1 +1,1 @@
-# Starcraft2_c-_Bot
+# Starcraft2 c# Bot
