@@ -5,7 +5,7 @@ namespace Bot {
     internal class Program {
         // Settings for your bot.
         private static readonly Bot bot = new RaxBot();
-        private const Race race = Race.Terran;
+        private const Race race = Race.Protoss;
 
         // Settings for single player mode.
 //        private static string mapName = "AbyssalReefLE.SC2Map";

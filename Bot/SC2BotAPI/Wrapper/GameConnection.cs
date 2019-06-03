@@ -16,11 +16,12 @@ namespace Bot {
         private string starcraftExe;
         private string starcraftMaps;
 
-        private void StartSC2Instance(int port) {
+        private void StartSC2Instance(int port, bool hidden = false) {
             var processStartInfo = new ProcessStartInfo(starcraftExe);
             processStartInfo.Arguments = string.Format("-listen {0} -port {1} -displayMode 0", address, port);
             processStartInfo.WorkingDirectory = Path.Combine(starcraftDir, "Support64");
-
+            if(hidden)
+                processStartInfo.WindowStyle = ProcessWindowStyle.Hidden;
             Logger.Info("Launching SC2:");
             Logger.Info("--> File: {0}", starcraftExe);
             Logger.Info("--> Working Dir: {0}", processStartInfo.WorkingDirectory);
