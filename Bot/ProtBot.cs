@@ -40,9 +40,9 @@ namespace Bot
             if (Controller.CanConstruct(Units.CYBERNETICS_CORE))
                 Controller.Construct(Units.CYBERNETICS_CORE);
 
-            if(Controller.)
+            /*if(Controller.)
 
-            if(Controller.CanConstruct(Units.ASSIMILATOR))
+            if(Controller.CanConstruct(Units.ASSIMILATOR))*/
                 
 
             List<Unit> units = Controller.GetUnits(Units.Structures);
