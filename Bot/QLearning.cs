@@ -5,10 +5,20 @@ using System.Text;
 using System.Threading.Tasks;
 using SC2APIProtocol;
 using TensorFlow;
+using KerasSharp;
+using KerasSharp.Layers;
 
 
 namespace Bot
 {
+
+
+    public class ProgabilityDistributuin : KerasSharp.Models.Model
+    {
+        public void call(object logits, TFTensor graf)
+        {
+        }
+    }
 
     public class Q_Learning
     {
@@ -25,7 +35,7 @@ namespace Bot
         private double e = 0.1;
         private int n_episodes = 2000;
 
-        public Q_Learning(List<int> actions)
+        public Q_Learning()
         {
             
             graf = new TFGraph();
@@ -47,7 +57,18 @@ namespace Bot
 
             using (TFSession session = new TFSession(graf))
             {
-                session.Run()
+                TFSession.Runner s = session.GetRunner();
+                s.Run();
+                for(int i = 0; i < n_episodes; i++)
+                {
+                    bool d = false;
+                    int j = 0;
+                    while(j < 99)
+                    {
+                        j += 1;
+                        
+                    }
+                }
             }
         }
 
