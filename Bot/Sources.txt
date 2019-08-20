@@ -1,0 +1,6 @@
+﻿cuda ja alea config: 
+http://www.aleagpu.com/release/3_0_4/doc/faq.html#config_cuda_version
+http://www.aleagpu.com/release/3_0_4/doc/installation.html#deployment_considerations
+
+NeuralNetwork.net:
+https://github.com/Sergio0694/NeuralNetwork.NET
