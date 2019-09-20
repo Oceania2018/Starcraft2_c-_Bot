@@ -166,6 +166,7 @@
     <Compile Include="SC2BotAPI\Wrapper\ProtobufProxy.cs" />
     <Compile Include="SC2BotAPI\Units.cs" />
     <Compile Include="SC2BotAPI\RaxBot.cs" />
+    <Compile Include="SmartActions.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="app.config" />

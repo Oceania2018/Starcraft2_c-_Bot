@@ -20,25 +20,40 @@ using NeuralNetworkNET.SupervisedLearning.Progress;
 namespace Bot
 {
 
+
     public class Q_Learning
     {
         private const string networkSaveName = "network";
         public int OutputSize = 8;
 
+        public float[] actionStates;
+
+        private INeuralNetwork trainingNetwork;
+
         public Q_Learning(int width, int height)
         {
+
+        }
+
+        public void DefineModel(int width, int height, float[] actions)
+        {
+            this.actionStates = actions;
+
+            trainingNetwork = NetworkManager.NewGraph(TensorInfo.Volume(width, height, 0), root =>
+            {
+                var fc1 = root.Layer(CuDnnNetworkLayers.FullyConnected(16, ActivationType.Sigmoid));
+                var fc2 = fc1.Layer(CuDnnNetworkLayers.FullyConnected(16, ActivationType.Sigmoid));
+                var model_out = fc2.Layer(CuDnnNetworkLayers.FullyConnected(OutputSize, ActivationType.Identity));
+            });
             
         }
 
-        public void DefineModel(int width, int height)
+
+
+        public int GetAction()
         {
-            INeuralNetwork network = NetworkManager.NewGraph(TensorInfo.Volume(width, height, 0), root =>
-            {
-                var fc1 = root.Pipeline(CuDnnNetworkLayers.FullyConnected(16, ActivationType.Sigmoid),
-                    CuDnnNetworkLayers.FullyConnected(16, ActivationType.Sigmoid),
-                    CuDnnNetworkLayers.FullyConnected(8, ActivationType.Identity)
-                    );
-            });
+            float[] trainingValues = trainingNetwork.Forward(actionStates);
+            return 0;
         }
        
     }
