@@ -1,9 +1,9 @@
 ﻿using System;
-//using SC2APIProtocol;
+using SC2APIProtocol;
 
 namespace Bot {
     internal class Program {
-       /* // Settings for your bot.
+        // Settings for your bot.
         private static readonly Bot bot = new RaxBot();
         private const Race race = Race.Protoss;
 
@@ -15,15 +15,14 @@ namespace Bot {
 
         private static readonly Race opponentRace = Race.Random;
         private static readonly Difficulty opponentDifficulty = Difficulty.Easy;
-        */
+        
         public static GameConnection gc;
         
         private static void Main(string[] args) {
 
-            System.Threading.Tasks.Task s = nnTest.Main();
-            s.RunSynchronously();
 
-           /* try {
+
+            try {
                 gc = new GameConnection();
                 if (args.Length == 0){
                     gc.readSettings();
@@ -36,7 +35,7 @@ namespace Bot {
                 Logger.Info(ex.ToString());
             }
 
-            Logger.Info("Terminated.");*/
+            Logger.Info("Terminated.");
         }
     }
 }

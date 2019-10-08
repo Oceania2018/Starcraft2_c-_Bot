@@ -1,0 +1,6 @@
+﻿training algorith on optimizer
+
+Mahdolliia mietintöjä:
+	Neuroverkon rakentausi yksilö pohjaisesti eli jokaisella yksiköllä on neuroverkko, mikä ohjaa niiten tekemistän ja oppimista, kun taas näitä verkkoja ohjaa korkeamman tahdon verkko,
+	jonka nimi olkoot hiveMind eli se määrää mitä rakennetaan ja minne yksiköt menee, mutta yksiköiden oma "aivo" ohjaa niiden tekemisiä eli abilityjen käyttöö, liikkumista jne.
+	tämä vaatii kaksi erillistä verkkoa ja ehkä kaksi eri mallia myös, koska molemmilla on erinlaiset tarpeet, mutta tämä pitää keskustella vielä läpi jonkun kanssa (ohjaajan tai muun ihmisen),
