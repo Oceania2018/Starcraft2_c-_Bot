@@ -67,7 +67,7 @@ namespace Bot
 
         public void Init()
         {
-            learner = new Q_Learning(SmartActions.Actiomap.Count, GetGameState().Length);
+            learner = new Q_Learning(GetGameState().Length, SmartActions.Actiomap.Count);
             learner.GetGameStates += GetGameState;
         }
 

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.IO;
 using System.Text;
 using System.Threading.Tasks;
 using SC2APIProtocol;
@@ -47,13 +48,22 @@ namespace Bot
         public float[] actionStates;
 
         private INeuralNetwork trainingNetwork;
-        private List<ActionPair> actionHistory = new List<ActionPair>();
+        private float[,] QTable;
         private int Width, Height;
 
         public Q_Learning(int width, int height)
         {
             this.Width = width;
             this.Height = height;
+            QTable = new float[width, height];
+
+            if(File.Exists(NetworkSaveName + NetworkLoader.NetworkFileExtension)){
+                trainingNetwork = NetworkLoader.TryLoad(new FileInfo(NetworkSaveName + NetworkSaveName), ExecutionModePreference.Cuda);
+            }
+            else
+            {
+                DefineModel();
+            }
         }
 
         public void DefineModel()
@@ -68,9 +78,9 @@ namespace Bot
             
         }
 
-        public void AddAction(ActionPair actionState)
+        public void AddAction(int[,] TakenActions)
         {
-            this.actionHistory.Add(actionState);
+            
         }
 
         public int GetAction(float e_greedy = 0.9f)
@@ -92,13 +102,8 @@ namespace Bot
 
         public void Train()
         {
-            float[,] xy = new float[actionHistory.Count, 2]; 
-            for(int i = 0; i < actionHistory.Count; i++)
-            {
-                xy[i, 0] = actionHistory[i].x;
-                xy[i, 1] = actionHistory[i].y;
-            }
-            ITrainingDataset dataset = DatasetLoader.Training((xy, null), actionHistory.Count);
+           
+            ITrainingDataset dataset = DatasetLoader.Training((QTable, null), QTable.Length);
             var results = NetworkManager.TrainNetwork(trainingNetwork, dataset, TrainingAlgorithms.AdaMax(), 20);
 
 
