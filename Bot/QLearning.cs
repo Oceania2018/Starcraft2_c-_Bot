@@ -20,16 +20,9 @@ using NeuralNetworkNET.SupervisedLearning.Progress;
 
 namespace Bot
 {
-    [System.Runtime.InteropServices.StructLayout(System.Runtime.InteropServices.LayoutKind.Sequential)]
-    public struct ActionPair
-    {
-        public float x;
-        public float y;
-    }
-
     /// <summary>
     /// First iteration:
-    /// build or not to build workers
+    /// 
     /// </summary>
     public class Q_Learning
     {
@@ -39,16 +32,18 @@ namespace Bot
         public const int RewardWin = 1;
 
         /// <summary>
-        /// Default 2 for testing the movement with this model
+        /// Default 2 
         /// </summary>
         public int OutputSize = 2;
-        public delegate int[] GameStateCallback();
+        public delegate float[] GameStateCallback();
         public GameStateCallback GetGameStates;
 
         public float[] actionStates;
 
         private INeuralNetwork trainingNetwork;
         private float[,] QTable;
+        private List<List<int>> QtableCopy = new List<List<int>>();
+        List<float[]> StateMemory = new List<float[]>();
         private int Width, Height;
 
         public Q_Learning(int width, int height)
@@ -56,7 +51,12 @@ namespace Bot
             this.Width = width;
             this.Height = height;
             QTable = new float[width, height];
-
+            for(int i = 0; i < height; i++)
+            {
+                QtableCopy.Add(new List<int>());
+            }
+            if (this.OutputSize == 2)
+                this.OutputSize = width * height;
             if(File.Exists(NetworkSaveName + NetworkLoader.NetworkFileExtension)){
                 trainingNetwork = NetworkLoader.TryLoad(new FileInfo(NetworkSaveName + NetworkSaveName), ExecutionModePreference.Cuda);
             }
@@ -68,13 +68,18 @@ namespace Bot
 
         public void DefineModel()
         {
-            
-            trainingNetwork = NetworkManager.NewGraph(TensorInfo.Volume(this.Width, this.Height, 1), root =>
+
+            trainingNetwork = NetworkManager.NewSequential(TensorInfo.Volume(this.Width, this.Height, 1),
+                CuDnnNetworkLayers.FullyConnected(16, ActivationType.Sigmoid),
+                CuDnnNetworkLayers.FullyConnected(16, ActivationType.Sigmoid),
+                CuDnnNetworkLayers.Softmax(OutputSize));
+
+            /*trainingNetwork = NetworkManager.NewGraph(TensorInfo.Volume(this.Width, this.Height, 1), root =>
             {
                 var fc1 = root.Layer(CuDnnNetworkLayers.FullyConnected(16, ActivationType.Sigmoid));
                 var fc2 = fc1.Layer(CuDnnNetworkLayers.FullyConnected(16, ActivationType.Sigmoid));
                 var model_out = fc2.Layer(CuDnnNetworkLayers.FullyConnected(OutputSize, ActivationType.Identity));
-            });
+            });*/
             
         }
 
@@ -85,27 +90,40 @@ namespace Bot
 
         public int GetAction(float e_greedy = 0.9f)
         {
-
-            if(ThreadSafeRandom.NextUniform() < e_greedy)
+            actionStates = GetGameStates();
+            StateMemory.Add(actionStates);
+            try
             {
-                float[] trainingValues = trainingNetwork.Forward(actionStates);
-                return (int)trainingValues.Max();
-            }
-            else
+                if (ThreadSafeRandom.NextUniform() < e_greedy)
+                {
+                    float[] trainingValues = trainingNetwork.Forward(actionStates);
+                    return (int)trainingValues.Max();
+                }
+                else
+                {
+                    return ThreadSafeRandom.NextInt(0, SmartActions.Actiomap.Count);
+                }
+            }catch(Exception ex)
             {
-                return ThreadSafeRandom.NextInt(0, SmartActions.Actiomap.Count);
+                Console.WriteLine(ex.Message);
+                return 0;
             }
-
-            
         }
 
 
         public void Train()
         {
-           
-            ITrainingDataset dataset = DatasetLoader.Training((QTable, null), QTable.Length);
-            var results = NetworkManager.TrainNetwork(trainingNetwork, dataset, TrainingAlgorithms.AdaMax(), 20);
-
+            float[,] data = new float[StateMemory.Count, 21];
+            for(int x = 0; x < StateMemory.Count; x++)
+            {
+                for(int y = 0; y < 21; y++)
+                {
+                    data[x, y] = data[x, y];
+                }
+            }
+            
+            ITrainingDataset dataset = DatasetLoader.Training((data, null), data.Length * 21);
+            TrainingSessionResult results = NetworkManager.TrainNetwork(trainingNetwork, dataset, TrainingAlgorithms.AdaMax(), 1);
 
         }
        

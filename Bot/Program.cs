@@ -4,14 +4,14 @@ using SC2APIProtocol;
 namespace Bot {
     internal class Program {
         // Settings for your bot.
-        private static readonly Bot bot = new RaxBot();
+        private static readonly Bot bot = new ProtBot();
         private const Race race = Race.Protoss;
-
         // Settings for single player mode.
-//        private static string mapName = "AbyssalReefLE.SC2Map";
-//        private static string mapName = "AbiogenesisLE.SC2Map";
-//        private static string mapName = "FrostLE.SC2Map";
-        private static readonly string mapName = "AcidPlantLE.SC2Map";
+        //        private static string mapName = "AbyssalReefLE.SC2Map";
+        //        private static string mapName = "AbiogenesisLE.SC2Map";
+        //        private static string mapName = "FrostLE.SC2Map";
+        //private static readonly string mapName = "AcidPlantLE.SC2Map";
+        private static readonly string mapName = "AcropolisLE.SC2Map";
 
         private static readonly Race opponentRace = Race.Random;
         private static readonly Difficulty opponentDifficulty = Difficulty.Easy;
@@ -20,8 +20,7 @@ namespace Bot {
         
         private static void Main(string[] args) {
 
-
-
+            
             try {
                 gc = new GameConnection();
                 if (args.Length == 0){

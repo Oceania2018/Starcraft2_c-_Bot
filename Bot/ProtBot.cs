@@ -11,10 +11,11 @@ namespace Bot
     {
 
         private Q_Learning learner;
+        private bool initialized = false;
 
-        public int[] GetGameState()
+        public float[] GetGameState()
         {
-            int[] ret = new int[21];
+            float[] ret = new float[21];
             List<object> scvs = new List<object>(Controller.GetUnits(Units.PROBE));
             ret[0] = scvs.Count;
             ret[1] = 0;
@@ -34,10 +35,25 @@ namespace Bot
             ret[7] = Controller.GetUnits(Units.ZEALOT).Count;
 
             List<object> Queue_Zelots = new List<object>();
-            if (((Unit)completed[0]).orders.Count > 0)
-                ret[8] = 0;
+
+            if (completed.Count > 0)
+            {
+                if (((Unit)completed[0]).orders != null)
+                {
+                    if (((Unit)completed[0]).orders.Count > 0)
+                        ret[8] = 0;
+                    else
+                        ret[8] = ((Unit)completed[0]).orders.Count;
+                }
+                else
+                {
+                    ret[8] = 0;
+                }
+            }
             else
-                ret[8] = ((Unit)completed[0]).orders.Count;
+            {
+                ret[8] = 0;
+            }
             ret[9] = (int)(Controller.maxSupply - Controller.obs.Observation.PlayerCommon.FoodUsed);
             ret[10] = Controller.CanAfford(Units.PYLON) == true ? 1 : 0;
             ret[11] = Controller.CanAfford(Units.GATEWAY) == true ? 1 : 0;
@@ -67,55 +83,28 @@ namespace Bot
 
         public void Init()
         {
+            SmartActions.Init();
             learner = new Q_Learning(GetGameState().Length, SmartActions.Actiomap.Count);
             learner.GetGameStates += GetGameState;
+            
+            initialized = true;
+            Logger.Info("QTable Initialized");
         }
 
         public IEnumerable<SC2APIProtocol.Action> OnFrame()
         {
             Controller.OpenFrame();
+            if (!initialized)
+                this.Init();
 
-            List<Unit> resourceCenters = Controller.GetUnits(Units.ResourceCenters);
 
-            foreach(var rc in resourceCenters)
-            {
-                if (Controller.CanConstruct(Units.PROBE))
-                {
-                    rc.Train(Units.PROBE);
-                }
-            }
+            int Action = learner.GetAction();
 
-            if(Controller.maxSupply - Controller.currentSupply <= 5)
-            {
-                if (Controller.CanConstruct(Units.PYLON))
-                    if (Controller.GetPendingCount(Units.PYLON) == 0)
-                        Controller.Construct(Units.PYLON);
-            }
-
+            SmartActions.Actiomap[Action](null);
             if (Controller.frame % 10 == 0)
                 Controller.DistributeWorkers();
 
-            if (Controller.CanConstruct(Units.GATEWAY))
-                if (Controller.GetTotalCount(Units.GATEWAY) < 4)
-                    Controller.Construct(Units.GATEWAY);
-
-            if (Controller.CanConstruct(Units.CYBERNETICS_CORE))
-                Controller.Construct(Units.CYBERNETICS_CORE);
-
-            /*if(Controller.)
-
-            if(Controller.CanConstruct(Units.ASSIMILATOR))*/
-                
-
-            List<Unit> units = Controller.GetUnits(Units.Structures);
-            foreach(var i in units)
-            {
-                if(i.unitType == Units.CYBERNETICS_CORE)
-                {
-
-                }
-            }
-
+            learner.Train();
             return Controller.CloseFrame();
         }
     }
