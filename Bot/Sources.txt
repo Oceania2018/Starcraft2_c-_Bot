@@ -4,3 +4,6 @@ http://www.aleagpu.com/release/3_0_4/doc/installation.html#deployment_considerat
 
 NeuralNetwork.net:
 https://github.com/Sergio0694/NeuralNetwork.NET
+
+Tensorflow.NET
+https://scisharp.github.io/SciSharp/

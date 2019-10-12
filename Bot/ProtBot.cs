@@ -84,8 +84,6 @@ namespace Bot
         public void Init()
         {
             SmartActions.Init();
-            learner = new Q_Learning(GetGameState().Length, SmartActions.Actiomap.Count);
-            learner.GetGameStates += GetGameState;
             
             initialized = true;
             Logger.Info("QTable Initialized");
@@ -98,13 +96,10 @@ namespace Bot
                 this.Init();
 
 
-            int Action = learner.GetAction();
 
-            SmartActions.Actiomap[Action](null);
             if (Controller.frame % 10 == 0)
                 Controller.DistributeWorkers();
 
-            learner.Train();
             return Controller.CloseFrame();
         }
     }

@@ -20,7 +20,10 @@ namespace Bot {
         
         private static void Main(string[] args) {
 
-            
+            Q_Learning learner = new Q_Learning();
+            learner.DefineModel();
+
+
             try {
                 gc = new GameConnection();
                 if (args.Length == 0){
