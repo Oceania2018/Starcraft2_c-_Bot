@@ -28,8 +28,9 @@ namespace Bot
         static void Main(string[] args)
         {
             Q_Learning lerner = new Q_Learning();
+            lerner.Init();
             lerner.DefineModel();
-
+            lerner.Close();
 
 
         }

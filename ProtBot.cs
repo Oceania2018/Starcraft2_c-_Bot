@@ -84,7 +84,7 @@ namespace Bot
         public void Init()
         {
             SmartActions.Init();
-            
+            learner = new Q_Learning();
             initialized = true;
             Logger.Info("QTable Initialized");
         }

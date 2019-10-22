@@ -19,6 +19,7 @@ namespace Bot
         /// </summary>
         public static Dictionary<int, SmartAction> Actiomap = new Dictionary<int, SmartAction>();
 
+        public static bool Initialized { get; private set; }
 
         private static object BuildPylon(object x)
         {
@@ -77,6 +78,8 @@ namespace Bot
             Actiomap.Add(1, BuildGateway);
             Actiomap.Add(2, BuildZealot);
             Actiomap.Add(3, AttackCommand);
+
+            Initialized = true;
         }
     }
 }
