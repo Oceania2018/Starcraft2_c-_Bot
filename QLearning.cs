@@ -49,7 +49,9 @@ namespace Bot
         public delegate GameState GetObs();
         public Func<float[]> GetScore; 
         public GetObs GetStates;
-        
+
+        public static int EpisodeCount = 0;
+
         public void DefineModel()
         {
 
@@ -104,12 +106,14 @@ namespace Bot
         private GameState lastState;
         private NDArray allQ;
         private NDArray a;
+
+        private float e = 0.1f;
         public float GetAction()
         {
             if (!nextAction)
             {
                 float[] s = GetStates().ToArray();
-                var ress = sess.run((predict, Qout), (input1, np.identity(21)["s: s+1"]));
+                var ress = sess.run((predict, Qout), (input1, np.identity(21)["s:s + 1"]));
                 a = ress.Item1;
                 allQ = ress.Item2;
                 if (np.random.rand(1) < 0.1)
@@ -117,7 +121,7 @@ namespace Bot
                     ress.Item1[0] = rand.Next(0, SmartActions.Actiomap.Count - 1);
                 }
                 lastState = GetStates();
-                nextAction = true;
+                nextAction = !nextAction;
                 return ress.Item1;
             }
             else
@@ -125,7 +129,13 @@ namespace Bot
                 var ress = sess.run(Qout, (input1, np.identity(16)[GetStates().ToArray()]));
                 var maxQ1 = np.max(ress);
                 var targetQ = allQ;
-                targetQ[a[0]] = GetRewards() * 0.99f * maxQ1;
+                float reward = GetRewards() * 0.99f * maxQ1;
+                targetQ.SetAtIndex(reward, a[0]);
+
+                sess.run((updateModel, w), (input1, np.identity(21)["s:s+1"]), (nextQ, targetQ));
+                nextAction = !nextAction;
+
+                return -1;
             }
         }
 

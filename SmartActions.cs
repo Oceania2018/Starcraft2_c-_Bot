@@ -74,11 +74,13 @@ namespace Bot
         /// </remarks>
         public static void Init()
         {
-            Actiomap.Add(0, BuildPylon);
-            Actiomap.Add(1, BuildGateway);
-            Actiomap.Add(2, BuildZealot);
-            Actiomap.Add(3, AttackCommand);
-
+            if (!Initialized)
+            {
+                Actiomap.Add(0, BuildPylon);
+                Actiomap.Add(1, BuildGateway);
+                Actiomap.Add(2, BuildZealot);
+                Actiomap.Add(3, AttackCommand);
+            }
             Initialized = true;
         }
     }

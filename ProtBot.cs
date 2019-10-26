@@ -9,7 +9,7 @@ using SC2APIProtocol;
 namespace Bot
 {
 
-    [StructLayout(LayoutKind.Sequential]
+    [StructLayout(LayoutKind.Sequential)]
     public struct GameState
     {
         public float scvsCount;
@@ -66,7 +66,8 @@ namespace Bot
     internal class ProtBot : Bot
     {
 
-        private Q_Learning learner;
+        public Q_Learning learner;
+        public bool Shutdown = false;
         private bool initialized = false;
 
        
@@ -142,8 +143,8 @@ namespace Bot
         public void Init()
         {
             SmartActions.Init();
-            learner = new Q_Learning();
             initialized = true;
+            learner.GetStates = GetGameState;
             learner.GetScore = GetScore;
             Logger.Info("QTable Initialized");
         }
@@ -163,7 +164,10 @@ namespace Bot
             Controller.OpenFrame();
             if (!initialized)
                 this.Init();
-            
+
+            float nexta = learner.GetAction();
+
+            SmartActions.Actiomap[(int)nexta](null);
 
             if (Controller.frame % 10 == 0)
                 Controller.DistributeWorkers();
