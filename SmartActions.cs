@@ -8,7 +8,7 @@ using SC2APIProtocol;
 namespace Bot
 {
     /// <summary>
-    /// Components for stalker fight
+    /// Components for ZEALOT fight
     /// </summary>
     public static class SmartActions
     {

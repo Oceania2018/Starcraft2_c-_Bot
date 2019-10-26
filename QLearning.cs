@@ -44,8 +44,10 @@ namespace Bot
 
         private Session sess;
         private List<Tuple<int[], int[]>> ActionSpaceHistory = new List<Tuple<int[], int[]>>();
+        private List<Tuple<float[], GameState>> spaceHistory = new List<Tuple<float[], GameState>>();
 
-        public delegate int[] GetObs();
+        public delegate GameState GetObs();
+        public Func<float[]> GetScore; 
         public GetObs GetStates;
         
         public void DefineModel()
@@ -75,17 +77,39 @@ namespace Bot
             
         }
 
+        public float GetRewards()
+        {
+
+            float rewardAmount = 0;
+
+            GameState state = GetStates();
+            GameState lastspace = spaceHistory.Last().Item2;
+            float[] score = GetScore();
+            if (state.EnemyMarine < lastspace.EnemyMarine)
+            {
+                rewardAmount += RewardTypes.EnemyUnityKilled;
+            }
+            if (score[1] > spaceHistory.Last().Item1[1])
+            {
+                rewardAmount += 1;
+            }
+
+
+            return rewardAmount;
+        }
+
         private Random rand = new Random();
 
         private bool nextAction = false;
-        private int[] lastState;
+        private GameState lastState;
         private NDArray allQ;
         private NDArray a;
         public float GetAction()
         {
             if (!nextAction)
             {
-                var ress = sess.run((predict, Qout), (input1, np.identity(21)[1]));
+                float[] s = GetStates().ToArray();
+                var ress = sess.run((predict, Qout), (input1, np.identity(21)["s: s+1"]));
                 a = ress.Item1;
                 allQ = ress.Item2;
                 if (np.random.rand(1) < 0.1)
@@ -98,10 +122,10 @@ namespace Bot
             }
             else
             {
-                var ress = sess.run(Qout, (input1, np.identity(16)[GetStates()]));
+                var ress = sess.run(Qout, (input1, np.identity(16)[GetStates().ToArray()]));
                 var maxQ1 = np.max(ress);
                 var targetQ = allQ;
-                targetQ[0, ]
+                targetQ[a[0]] = GetRewards() * 0.99f * maxQ1;
             }
         }
 
