@@ -33,6 +33,7 @@ namespace Bot
         private const string NetworkSaveName = "network";
 
         /******/
+        Graph NetworkGraph;
         Tensor input1;
         RefVariable w;
         Tensor Qout;
@@ -41,6 +42,7 @@ namespace Bot
         Tensor loss;
         Optimizer trainer;
         Operation updateModel;
+        private bool BuildModel = false;
 
         private Session sess;
         private List<Tuple<int[], int[]>> ActionSpaceHistory = new List<Tuple<int[], int[]>>();
@@ -52,28 +54,30 @@ namespace Bot
 
         public static int EpisodeCount = 0;
 
-        public void DefineModel()
+        private void DefineModel()
         {
 
+            
             if (!SmartActions.Initialized)
                 SmartActions.Init();
-
-            var s = tf.global_variables_initializer();
+            
+            
             input1 = tf.placeholder(TF_DataType.TF_FLOAT, (1, 21));
             w = tf.Variable(tf.random_uniform(new[] { 21, SmartActions.Actiomap.Count }, 0.0f, 0.01f));
             Qout = tf.matmul(input1, w);
-            predict = tf.argmax(Qout);
+            predict = tf.argmax(Qout, 1);
 
             nextQ = tf.placeholder(TF_DataType.TF_FLOAT, (1, SmartActions.Actiomap.Count));
             loss = tf.reduce_sum((tf.square(nextQ - Qout)));
             trainer = tf.train.GradientDescentOptimizer(0.1f);
             updateModel = trainer.minimize(loss);
-
-
+            BuildModel = true;
         }
 
         public void Init()
         {
+            if(!BuildModel)
+                this.DefineModel();
             sess = tf.Session();
             sess.run(tf.global_variables_initializer());
             
@@ -113,7 +117,7 @@ namespace Bot
             if (!nextAction)
             {
                 float[] s = GetStates().ToArray();
-                var ress = sess.run((predict, Qout), (input1, np.identity(21)["s:s + 1"]));
+                var ress = sess.run((predict, Qout), (input1, s));
                 a = ress.Item1;
                 allQ = ress.Item2;
                 if (np.random.rand(1) < 0.1)
@@ -131,8 +135,8 @@ namespace Bot
                 var targetQ = allQ;
                 float reward = GetRewards() * 0.99f * maxQ1;
                 targetQ.SetAtIndex(reward, a[0]);
-
-                sess.run((updateModel, w), (input1, np.identity(21)["s:s+1"]), (nextQ, targetQ));
+                float[] s = GetStates().ToArray();
+                sess.run((updateModel, w), (input1, s), (nextQ, targetQ));
                 nextAction = !nextAction;
 
                 return -1;
@@ -146,6 +150,7 @@ namespace Bot
             Saver s = tf.train.Saver();
             s.save(sess, "model");
             sess.close();
+            sess.Dispose();
             
         }
     }

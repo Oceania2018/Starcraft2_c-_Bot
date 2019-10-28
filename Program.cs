@@ -2,9 +2,6 @@
 using System.Threading.Tasks;
 using SC2APIProtocol;
 using NumSharp;
-using Tensorflow;
-using Tensorflow.Hub;
-using static Tensorflow.Binding;
 
 namespace Bot
 {
@@ -38,7 +35,6 @@ namespace Bot
 
 
             lerner.Init();
-            lerner.DefineModel();
             (bot as ProtBot).learner = lerner;
             try
             {
