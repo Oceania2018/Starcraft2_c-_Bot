@@ -144,6 +144,7 @@ namespace Bot
         {
             SmartActions.Init();
             initialized = true;
+            learner.Init();
             learner.GetStates = GetGameState;
             learner.GetScore = GetScore;
             Logger.Info("QTable Initialized");

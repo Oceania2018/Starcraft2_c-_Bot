@@ -34,7 +34,6 @@ namespace Bot
         {
 
 
-            lerner.Init();
             (bot as ProtBot).learner = lerner;
             try
             {

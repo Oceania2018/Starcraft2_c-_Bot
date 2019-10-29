@@ -56,12 +56,11 @@ namespace Bot
 
         private void DefineModel()
         {
-
             
             if (!SmartActions.Initialized)
                 SmartActions.Init();
-            
-            
+
+
             input1 = tf.placeholder(TF_DataType.TF_FLOAT, (1, 21));
             w = tf.Variable(tf.random_uniform(new[] { 21, SmartActions.Actiomap.Count }, 0.0f, 0.01f));
             Qout = tf.matmul(input1, w);
@@ -76,10 +75,12 @@ namespace Bot
 
         public void Init()
         {
-            if(!BuildModel)
-                this.DefineModel();
-            sess = tf.Session();
-            sess.run(tf.global_variables_initializer());
+            np.random.seed(4);
+            this.NetworkGraph = tf.Graph().as_default();
+            this.DefineModel();
+            var init = tf.global_variables_initializer();
+            sess = tf.Session(NetworkGraph);
+            sess.run(init);
             
         }
 
@@ -114,29 +115,33 @@ namespace Bot
         private float e = 0.1f;
         public float GetAction()
         {
+            spaceHistory.Add(new Tuple<float[], GameState>(GetStates().ToArray(), GetStates()));
+            this.Init();
             if (!nextAction)
             {
                 float[] s = GetStates().ToArray();
-                var ress = sess.run((predict, Qout), (input1, s));
+                var ress = sess.run((this.predict, this.Qout), (this.input1, np.identity(s.Length)[s]));
                 a = ress.Item1;
                 allQ = ress.Item2;
-                if (np.random.rand(1) < 0.1)
+                
+                if ((float)rand.NextDouble() < e)
                 {
                     ress.Item1[0] = rand.Next(0, SmartActions.Actiomap.Count - 1);
                 }
                 lastState = GetStates();
                 nextAction = !nextAction;
-                return ress.Item1;
+                return (float)ress.Item1[0];
             }
             else
             {
-                var ress = sess.run(Qout, (input1, np.identity(16)[GetStates().ToArray()]));
+                float[] y = GetStates().ToArray();
+                var ress = sess.run(Qout, (input1, np.identity(y.Length)[y]));
                 var maxQ1 = np.max(ress);
                 var targetQ = allQ;
                 float reward = GetRewards() * 0.99f * maxQ1;
                 targetQ.SetAtIndex(reward, a[0]);
                 float[] s = GetStates().ToArray();
-                sess.run((updateModel, w), (input1, s), (nextQ, targetQ));
+                sess.run((this.updateModel, this.w), (input1, np.identity(s.Length)[s]), (nextQ, targetQ));
                 nextAction = !nextAction;
 
                 return -1;
