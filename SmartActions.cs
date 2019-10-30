@@ -25,7 +25,23 @@ namespace Bot
         {
             if (Controller.CanAfford(Units.PYLON))
             {
-                Controller.Construct(Units.PYLON);
+                var resourceCenters = Controller.GetUnits(Units.ResourceCenters);
+                foreach (var rc in resourceCenters)
+                {
+                    if (Controller.CanConstruct(Units.PROBE))
+                        rc.Train(Units.PROBE);
+                }
+                List<Unit> worker = Controller.GetUnits(Units.PROBE);
+
+                for(int i = 0; i < worker.Count; i++)
+                {
+                    if (worker[i].orders.Count == 0)
+                    {
+                        Controller.Construct(Units.PYLON);
+                        break;
+                    }
+
+                }
                 return true;
             }
             return false;
@@ -63,25 +79,6 @@ namespace Bot
             return false;
         }
 
-        /// <summary>
-        /// Initialize smart actions
-        /// </summary>
-        /// <remarks>
-        /// Order:
-        /// 0-x build commands
-        /// x-y unit commands (ALL UNITS)
-        /// 0 Build pylon
-        /// </remarks>
-        public static void Init()
-        {
-            if (!Initialized)
-            {
-                Actiomap.Add(0, BuildPylon);
-                Actiomap.Add(1, BuildGateway);
-                Actiomap.Add(2, BuildZealot);
-                Actiomap.Add(3, AttackCommand);
-            }
-            Initialized = true;
-        }
+        
     }
 }

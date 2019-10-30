@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
-using System.Threading.Tasks;
+using System.Threading;
 using System.Runtime.InteropServices;
 using SC2APIProtocol;
 
@@ -69,9 +69,62 @@ namespace Bot
         public Q_Learning learner;
         public bool Shutdown = false;
         private bool initialized = false;
+        private Thread learnerThread;
 
-       
-           
+        private object BuildPylon(object x)
+        {
+            if (Controller.CanAfford(Units.PYLON))
+            {
+
+                List<Unit> worker = Controller.GetUnits(Units.PROBE);
+
+                for (int i = 0; i < worker.Count; i++)
+                {
+                    if (worker[i].orders.Count == 0)
+                    {
+                        Controller.Construct(Units.PYLON);
+                        break;
+                    }
+
+                }
+                return true;
+            }
+            return false;
+        }
+
+        private object BuildGateway(object x)
+        {
+            if (Controller.CanAfford(Units.GATEWAY))
+            {
+                Controller.Construct(Units.GATEWAY);
+                return true;
+            }
+            return false;
+        }
+
+        private object BuildZealot(object x)
+        {
+            int count = 0;
+            foreach (Unit bar in Controller.GetUnits(Units.GATEWAY, onlyCompleted: true))
+            {
+                bar.Train(Units.ZEALOT);
+                count++;
+            }
+            return count;
+        }
+
+        private object AttackCommand(object x)
+        {
+            List<Unit> army = Controller.GetUnits(Units.ArmyUnits);
+            if (army.Count > 0)
+            {
+                Controller.Attack(army, Controller.enemyLocations[0]);
+                return true;
+            }
+            return false;
+        }
+
+
         public GameState GetGameState()
         {
             GameState ret;
@@ -142,7 +195,10 @@ namespace Bot
 
         public void Init()
         {
-            SmartActions.Init();
+            SmartActions.Actiomap.Add(0, BuildPylon);
+            SmartActions.Actiomap.Add(1, BuildGateway);
+            SmartActions.Actiomap.Add(2, BuildZealot);
+            SmartActions.Actiomap.Add(3, AttackCommand);
             initialized = true;
             learner.Init();
             learner.GetStates = GetGameState;
@@ -170,7 +226,7 @@ namespace Bot
 
             SmartActions.Actiomap[(int)nexta](null);
 
-            if (Controller.frame % 10 == 0)
+            if (Controller.frame % 60 == 0)
                 Controller.DistributeWorkers();
 
             return Controller.CloseFrame();
