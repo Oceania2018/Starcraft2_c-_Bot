@@ -200,6 +200,7 @@ namespace Bot
             SmartActions.Actiomap.Add(2, BuildZealot);
             SmartActions.Actiomap.Add(3, AttackCommand);
             initialized = true;
+            learner = new Q_Learning();
             learner.Init();
             learner.GetStates = GetGameState;
             learner.GetScore = GetScore;

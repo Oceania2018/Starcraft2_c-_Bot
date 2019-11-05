@@ -22,19 +22,13 @@ namespace Bot
 
         public static GameConnection gc;
 
-        private  static Q_Learning lerner = new Q_Learning();
         
-        public static void OnShutdown(object sender, ConsoleCancelEventArgs e)
-        {
-            lerner.Close();
-            
-        }
+
 
         static void Main(string[] args)
         {
 
 
-            (bot as ProtBot).learner = lerner;
             try
             {
                 gc = new GameConnection();

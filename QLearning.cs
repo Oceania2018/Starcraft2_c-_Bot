@@ -39,8 +39,8 @@ namespace Bot
         Tensor Qout;
         Tensor predict;
         Tensor nextQ;
-        Tensor loss;
-        Optimizer trainer;
+        //Tensor loss;
+        //Optimizer trainer;
         Operation updateModel;
         private bool BuildModel = false;
 
@@ -64,10 +64,12 @@ namespace Bot
             predict = tf.argmax(Qout, 1);
 
             nextQ = tf.placeholder(TF_DataType.TF_FLOAT, (1, SmartActions.Actiomap.Count));
-            loss = tf.reduce_sum((tf.square(nextQ - Qout)));
-            trainer = tf.train.GradientDescentOptimizer(0.1f);
+            Tensor loss = tf.reduce_sum((tf.square(nextQ - Qout)));
+            Optimizer trainer = tf.train.GradientDescentOptimizer(0.1f);
             updateModel = trainer.minimize(loss);
             BuildModel = true;
+            
+
             return graph;
         }
 
@@ -75,9 +77,11 @@ namespace Bot
         {
             np.random.seed(4);
             this.NetworkGraph = this.DefineModel();
+            sess = new Session(NetworkGraph);
             var init = tf.global_variables_initializer();
-            sess = tf.Session(NetworkGraph);
             sess.run(init);
+            tf.train.export_meta_graph("asd.meta.txt", as_text: true);
+
         }
 
         public float GetRewards()
@@ -109,12 +113,15 @@ namespace Bot
         private NDArray a;
 
         private double e = 0.1f;
+        int cc = 1;
         public float GetAction()
         {
+            tf.train.export_meta_graph(cc++ + "asdd.meta.txt", as_text: true);
             
             spaceHistory.Add(new Tuple<float[], GameState>(GetStates().ToArray(), GetStates()));
             if (!nextAction)
             {
+
                 float[] s = GetStates().ToArray();
                 var ress = sess.run((this.predict, this.Qout), (this.input1, np.identity(s.Length)[s]));
                 a = ress.Item1;
